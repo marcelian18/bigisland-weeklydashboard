@@ -1,0 +1,336 @@
+<title>Big Island Performance — Option B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --page:      #ffffff;
+    --surface:   #ffffff;
+    --surface-2: #f2f7f7;
+    --ink:       #12201f;
+    --ink-2:     #46605e;
+    --muted:     #7f9492;
+    --border:    rgba(18,32,31,0.12);
+    --border-strong: rgba(18,32,31,0.22);
+    --accent:    #0e7c86;
+    --accent-2:  #e0592f;
+    --accent-ink:#ffffff;
+    --accent-soft: rgba(14,124,134,0.10);
+    --accent-soft-strong: rgba(14,124,134,0.18);
+    --good:      #0ca30c;
+    --warning:   #b8790a;
+    --warning-bg: rgba(250,178,25,0.16);
+    --serious:   #d1562f;
+    --serious-bg: rgba(236,131,90,0.16);
+    --critical:  #d03b3b;
+    --critical-bg: rgba(208,59,59,0.12);
+    --good-bg:   rgba(12,163,12,0.12);
+    --shadow: 0 1px 2px rgba(18,32,31,0.06), 0 8px 24px -12px rgba(18,32,31,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--page); color:var(--ink);
+    font-family:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{ font-family:"Manrope","IBM Plex Sans",sans-serif; }
+  .mono{ font-family:"IBM Plex Mono", ui-monospace, monospace; }
+  h1,h2,h3{ text-wrap:balance; margin:0; }
+  .tabular{ font-variant-numeric: tabular-nums; }
+
+  .topo{
+    position:relative; overflow:hidden;
+    background:
+      radial-gradient(1000px 320px at 85% -20%, rgba(224,89,47,0.10), transparent 60%),
+      radial-gradient(1100px 340px at 10% -10%, var(--accent-soft), transparent 60%),
+      var(--surface);
+    border-bottom:1px solid var(--border);
+  }
+  .topo svg.contours{ position:absolute; inset:0; width:100%; height:100%; opacity:.7; }
+  .header-inner{
+    position:relative; max-width:1280px; margin:0 auto; padding:36px 28px 26px;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .eyebrow{
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-2);
+    display:flex; align-items:center; gap:8px; font-weight:600;
+  }
+  .eyebrow .mark{ width:8px; height:8px; border-radius:50%; background:var(--accent-2); display:inline-block; }
+  .title-row{ display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; }
+  h1.brand{ font-size:50px; line-height:.98; font-weight:800; letter-spacing:-.01em; }
+  .subtitle{ font-size:19px; color:var(--ink-2); font-weight:500; }
+  .meta-row{
+    display:flex; gap:22px; flex-wrap:wrap; font-size:13.5px; color:var(--ink-2);
+    padding-top:6px; border-top:1px solid var(--border); margin-top:6px;
+  }
+  .meta-row span{ display:flex; align-items:center; gap:6px; }
+  .meta-row b{ color:var(--ink); font-weight:600; }
+  .dot{ color:var(--border-strong); }
+
+  .toolbar{ position:sticky; top:0; z-index:20; background:var(--page); border-bottom:1px solid var(--border); }
+  .toolbar-inner{ max-width:1280px; margin:0 auto; padding:14px 28px; display:flex; flex-wrap:wrap; align-items:center; gap:14px; }
+
+  .search{
+    display:flex; align-items:center; gap:8px; border:1px solid var(--border);
+    background:var(--surface); border-radius:8px; padding:7px 12px; flex:1; min-width:180px; max-width:280px;
+  }
+  .search svg{ width:15px; height:15px; color:var(--muted); flex:none; }
+  .search input{ border:none; outline:none; background:transparent; font-size:13.5px; width:100%; color:var(--ink); font-family:inherit; }
+  .search input::placeholder{ color:var(--muted); }
+
+  .flags{ display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; }
+  .flag-chip{
+    display:flex; align-items:center; gap:6px; border:1px solid var(--border);
+    background:var(--surface); padding:6px 12px; border-radius:999px; font-size:12.5px;
+    font-weight:600; cursor:pointer; color:var(--ink-2); font-family:inherit;
+  }
+  .flag-chip .swatch{ width:8px; height:8px; border-radius:50%; }
+  .flag-chip[data-flag="blocked"] .swatch{ background:var(--critical); }
+  .flag-chip[data-flag="stale"] .swatch{ background:var(--serious); }
+  .flag-chip.active{ background:var(--accent-soft); border-color:var(--accent); color:var(--ink); }
+  .flag-chip .count{ color:var(--muted); font-weight:500; }
+  .flag-chip.active .count{ color:var(--ink-2); }
+
+  main{ max-width:1280px; margin:0 auto; padding:22px 28px 64px; }
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:18px 20px 14px; flex-wrap:wrap; }
+  .panel-head h2{ font-size:17px; font-weight:700; }
+  .panel-head .sub{ font-size:12.5px; color:var(--muted); }
+  .table-scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; min-width:760px; }
+  thead th{
+    position:sticky; top:0; background:var(--surface);
+    text-align:left; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--muted); font-weight:600; padding:10px 16px; border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  thead th.sortable{ cursor:pointer; user-select:none; }
+  thead th.sortable:hover{ color:var(--ink-2); }
+  .sort-carets{ display:inline-flex; flex-direction:column; gap:2px; margin-left:5px; vertical-align:middle; position:relative; top:-1px; }
+  .sort-carets .caret{ width:0; height:0; border-left:3.5px solid transparent; border-right:3.5px solid transparent; }
+  .sort-carets .caret.up{ border-bottom:4px solid var(--muted); opacity:.35; }
+  .sort-carets .caret.down{ border-top:4px solid var(--muted); opacity:.35; }
+  .sort-carets .caret.active{ opacity:1; border-bottom-color:var(--accent-2); border-top-color:var(--accent-2); }
+  tbody td{ padding:10px 16px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:var(--surface-2); }
+  td.num, th.num{ text-align:right; }
+  .unit-cell{ font-weight:700; }
+  .badges{ display:flex; gap:5px; flex-wrap:wrap; }
+  .badge{ display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; white-space:nowrap; }
+  .badge .dot{ width:6px; height:6px; border-radius:50%; flex:none; }
+  .badge.blocked{ background:var(--critical-bg); color:var(--critical); }
+  .badge.blocked .dot{ background:var(--critical); }
+  .badge.stale{ background:var(--serious-bg); color:var(--serious); }
+  .badge.stale .dot{ background:var(--serious); }
+  .no-flags{ color:var(--muted); font-size:12px; }
+  .empty-row td{ text-align:center; color:var(--muted); padding:40px 16px; }
+  .spark-cell{ width:150px; }
+  tfoot td{ padding:12px 16px; font-size:12px; color:var(--muted); border-top:1px solid var(--border); }
+
+  footer{ max-width:1280px; margin:0 auto; padding:8px 28px 40px; display:flex; justify-content:space-between; color:var(--muted); font-size:12px; flex-wrap:wrap; gap:8px; }
+  a{ color: inherit; }
+
+  @media (max-width:640px){
+    h1.brand{ font-size:36px; }
+    .header-inner{ padding:26px 18px 20px; }
+    .toolbar-inner, main, footer{ padding-left:18px; padding-right:18px; }
+    .flags{ margin-left:0; }
+  }
+</style>
+
+<div class="topo">
+  <svg class="contours" viewBox="0 0 1280 220" preserveAspectRatio="none" aria-hidden="true">
+    <g fill="none" stroke="currentColor" stroke-width="1.4" style="color:var(--accent)">
+      <path d="M-20,170 C 140,150 220,190 380,170 C 540,150 620,190 780,170 C 940,150 1020,190 1180,170 C 1250,163 1290,172 1300,170" opacity="0.22"/>
+      <path d="M-20,140 C 160,118 250,158 420,140 C 590,118 680,158 850,140 C 1020,118 1110,158 1300,140" opacity="0.16"/>
+      <path d="M-20,105 C 180,80 280,124 460,105 C 640,80 740,124 920,105 C 1100,80 1200,124 1300,110" opacity="0.11"/>
+    </g>
+    <g fill="none" stroke="var(--accent-2)" stroke-width="1.6" style="color:var(--accent-2)">
+      <path d="M-20,60 C 200,20 320,72 540,55 C 760,20 880,72 1100,55 C 1180,47 1250,54 1300,50" opacity="0.16"/>
+    </g>
+  </svg>
+  <div class="header-inner">
+    <div class="eyebrow"><span class="mark"></span>Rev &amp; Research &middot; Portfolio Operations</div>
+    <div class="title-row">
+      <h1 class="brand display">Big Island</h1>
+      <div class="subtitle">Unit Performance</div>
+    </div>
+    <div class="meta-row">
+      <span><b id="stat-units">20</b> units tracked</span>
+      <span class="dot">&middot;</span>
+      <span>Data as of <b>Sep 16, 2026</b>, sourced from Wheelhouse export</span>
+      <span class="dot">&middot;</span>
+      <span>Prepared by <b>Rev &amp; Research</b></span>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="toolbar-inner">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="search-input" type="text" placeholder="Search unit…">
+    </div>
+    <div class="flags" id="flag-switch">
+      <button class="flag-chip" data-flag="stale"><span class="swatch"></span>Stale 14d+ <span class="count"></span></button>
+      <button class="flag-chip" data-flag="blocked"><span class="swatch"></span>Blocked 25+ <span class="count"></span></button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="panel" id="metrics-panel">
+    <div class="panel-head">
+      <h2>Unit Metrics &middot; Booking Pace &amp; History</h2>
+      <div class="sub">Click a column to sort &middot; 13-month occupancy trend, most recent month on the right</div>
+    </div>
+    <div class="table-scroll">
+      <table id="mt-table">
+        <thead>
+          <tr>
+            <th class="sortable" data-key="unit">Unit <span class="sort-carets"><span class="caret up"></span><span class="caret down"></span></span></th>
+            <th class="sortable num" data-key="bedrooms">Beds <span class="sort-carets"><span class="caret up"></span><span class="caret down"></span></span></th>
+            <th class="sortable num" data-key="lastBooked">Last Booked <span class="sort-carets"><span class="caret up"></span><span class="caret down"></span></span></th>
+            <th class="sortable num" data-key="blocked60">Blocked (60d) <span class="sort-carets"><span class="caret up"></span><span class="caret down"></span></span></th>
+            <th class="sortable num" data-key="minPrice60">Min-Price Hits (60d) <span class="sort-carets"><span class="caret up"></span><span class="caret down"></span></span></th>
+            <th class="sortable num" data-key="pickup14">Pickup (14d nts) <span class="sort-carets"><span class="caret up"></span><span class="caret down"></span></span></th>
+            <th>Flags</th>
+            <th class="spark-cell">Occupancy Trend</th>
+          </tr>
+        </thead>
+        <tbody id="mt-body"></tbody>
+      </table>
+    </div>
+    <tfoot><tr><td id="mt-footnote">&nbsp;</td></tr></tfoot>
+  </div>
+</main>
+
+<footer>
+  <span>Big Island Metrics Report &middot; 9.16.2026</span>
+  <span>Built with Claude &middot; Rev &amp; Research</span>
+</footer>
+
+<script>
+const DASHBOARD_DATA = {"generatedFrom":"Big Island Metrics Report 9.16.2026.xlsx","metrics":{"dateCols":["Sep 1","Oct 1","Nov 1","Dec 1","Jan 1","Feb 1","Mar 1","Apr 1","May 1","Jun 1","Jul 1","Aug 1","Sep 1"],"units":[{"unit":"FV I31","bedrooms":3,"lastBooked":1,"blocked60":7,"minPrice60":13,"pickup14":0,"trend":[0.7,0.613,0,0.29,0.032,0,0,0,0,0,0,0,0]},{"unit":"HK 23E","bedrooms":3,"lastBooked":5,"blocked60":0,"minPrice60":11,"pickup14":13,"trend":[0.433,0.645,0.233,0,0,0,0,0,0,0,0,0,0]},{"unit":"HK 7C","bedrooms":2,"lastBooked":7,"blocked60":0,"minPrice60":4,"pickup14":4,"trend":[0.633,0.677,0.233,0.484,0.71,0.821,0.29,0,0,0,0,0,0]},{"unit":"IML Q1","bedrooms":2,"lastBooked":2,"blocked60":0,"minPrice60":10,"pickup14":7,"trend":[0.667,0.677,0.167,0.161,0.065,0,0.387,0,0,0,0,0,0]},{"unit":"K 16A","bedrooms":3,"lastBooked":32,"blocked60":3,"minPrice60":26,"pickup14":0,"trend":[0,0,0,0,0,0,0,0,0,0,0,0,0]},{"unit":"PVML G1","bedrooms":3,"lastBooked":22,"blocked60":0,"minPrice60":34,"pickup14":0,"trend":[0,0.194,0,0.161,0.032,0,0,0,0,0,0,0,0]},{"unit":"SBT 321","bedrooms":1,"lastBooked":10,"blocked60":0,"minPrice60":8,"pickup14":14,"trend":[0.5,0.871,0.467,0.226,0.29,0.571,0,0.233,0.452,0.3,0,0,0]},{"unit":"SBT 322","bedrooms":2,"lastBooked":39,"blocked60":13,"minPrice60":16,"pickup14":0,"trend":[0.4,0.581,0,0.323,0,0,0,0,0,0,0,0,0]},{"unit":"SBTT 336","bedrooms":2,"lastBooked":3,"blocked60":5,"minPrice60":40,"pickup14":5,"trend":[0.167,0.645,0.167,0,0.226,1,0.226,0,0,0,0,0,0]},{"unit":"SV 017","bedrooms":2,"lastBooked":41,"blocked60":2,"minPrice60":11,"pickup14":0,"trend":[0.767,0,0,0,0,0,0,0,0,0,0,0,0]},{"unit":"V F104","bedrooms":2,"lastBooked":93,"blocked60":60,"minPrice60":15,"pickup14":0,"trend":[0.333,0,0,0,0,0,0,0,0,0,0,0,0]},{"unit":"V G306","bedrooms":2,"lastBooked":1,"blocked60":7,"minPrice60":17,"pickup14":20,"trend":[0.433,0.677,0,0.258,0,0,0,0,0,0.133,0.065,0.097,0]},{"unit":"WCV 1106","bedrooms":2,"lastBooked":36,"blocked60":31,"minPrice60":6,"pickup14":0,"trend":[0.4,0.355,0,0,0,0,0,0,0,0,0,0,0]},{"unit":"WCV 2106","bedrooms":2,"lastBooked":1,"blocked60":0,"minPrice60":16,"pickup14":12,"trend":[0.567,0.548,0.267,0.032,0,0,0,0,0,0.333,0,0,0]},{"unit":"WCV 2204","bedrooms":2,"lastBooked":6,"blocked60":0,"minPrice60":34,"pickup14":8,"trend":[0.267,0.387,0,0,0,0,0,0,0,0,0,0,0]},{"unit":"WCV 806","bedrooms":2,"lastBooked":7,"blocked60":9,"minPrice60":24,"pickup14":14,"trend":[0.433,0.355,0.367,0,0,0.5,0.29,0,0,0,0,0,0]},{"unit":"WH 1302","bedrooms":2,"lastBooked":38,"blocked60":0,"minPrice60":37,"pickup14":0,"trend":[0.267,0.484,0,0,0,0,0,0,0,0,0,0,0]},{"unit":"WV B103","bedrooms":1,"lastBooked":5,"blocked60":6,"minPrice60":37,"pickup14":5,"trend":[0.367,0.419,0.167,0,0,0.071,0.71,0,0,0,0,0,0]},{"unit":"WV B202","bedrooms":2,"lastBooked":45,"blocked60":3,"minPrice60":44,"pickup14":0,"trend":[0.467,0.452,0,0,0,0,0,0,0,0,0,0,0]},{"unit":"WV G201","bedrooms":2,"lastBooked":0,"blocked60":5,"minPrice60":44,"pickup14":17,"trend":[0.233,0.516,0,0,0,0.071,0.258,0,0,0,0,0,0]}]}};
+</script>
+<script>
+(function(){
+  let state = { search:"", flags:new Set(), sort:{key:"lastBooked", dir:-1} };
+
+  function buildRows(){
+    return DASHBOARD_DATA.metrics.units.map(m => {
+      const flags = [];
+      if (m.lastBooked >= 14) flags.push("stale");
+      if (m.blocked60 >= 25) flags.push("blocked");
+      return Object.assign({}, m, { flags });
+    });
+  }
+
+  const FLAG_META = {
+    blocked:{cls:"blocked", label:"Blocked 25+"},
+    stale:{cls:"stale", label:"Stale 14d+"}
+  };
+
+  function badgeHtml(flags){
+    if (!flags.length) return '<span class="no-flags">None</span>';
+    return '<div class="badges">' + flags.map(f => {
+      const meta = FLAG_META[f];
+      return `<span class="badge ${meta.cls}"><span class="dot"></span>${meta.label}</span>`;
+    }).join("") + '</div>';
+  }
+
+  function sparkSvg(trend){
+    const w = 130, h = 34, pad = 3;
+    const max = Math.max(...trend, 0.01);
+    const step = (w - pad*2) / (trend.length - 1);
+    const pts = trend.map((v,i) => [pad + i*step, h - pad - (v/max)*(h-pad*2)]);
+    const path = pts.map((p,i) => (i===0?"M":"L") + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+    const areaPath = path + ` L${pts[pts.length-1][0].toFixed(1)},${h-pad} L${pts[0][0].toFixed(1)},${h-pad} Z`;
+    const last = pts[pts.length-1];
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-label="occupancy trend">
+      <path d="${areaPath}" fill="var(--accent-soft)" stroke="none"/>
+      <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.6" fill="var(--accent-2)"/>
+    </svg>`;
+  }
+
+  function matchesFlags(flags){
+    if (state.flags.size === 0) return true;
+    for (const f of state.flags) if (flags.includes(f)) return true;
+    return false;
+  }
+  function matchesSearch(unit){
+    if (!state.search) return true;
+    return unit.toLowerCase().includes(state.search.toLowerCase());
+  }
+  function sortRows(rows, sort){
+    rows.sort((a,b) => {
+      const av = a[sort.key], bv = b[sort.key];
+      if (typeof av === "string") return av.localeCompare(bv) * sort.dir;
+      return (av - bv) * sort.dir;
+    });
+  }
+  function updateSortCarets(table, sort){
+    table.querySelectorAll("thead th.sortable").forEach(th => {
+      const isSorted = th.dataset.key === sort.key;
+      th.classList.toggle("sorted", isSorted);
+      const up = th.querySelector(".caret.up"), down = th.querySelector(".caret.down");
+      if (up) up.classList.toggle("active", isSorted && sort.dir === 1);
+      if (down) down.classList.toggle("active", isSorted && sort.dir === -1);
+    });
+  }
+
+  function renderFlagCounts(rows){
+    const counts = {stale:0, blocked:0};
+    rows.forEach(r => r.flags.forEach(f => counts[f]++));
+    document.querySelectorAll(".flag-chip").forEach(chip => {
+      const f = chip.dataset.flag;
+      chip.querySelector(".count").textContent = counts[f];
+      chip.classList.toggle("active", state.flags.has(f));
+    });
+  }
+
+  function render(){
+    const all = buildRows();
+    let rows = all.filter(r => matchesSearch(r.unit) && matchesFlags(r.flags));
+    sortRows(rows, state.sort);
+    const tbody = document.getElementById("mt-body");
+    if (!rows.length){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No units match the current filters.</td></tr>';
+    } else {
+      tbody.innerHTML = rows.map(r => `<tr>
+        <td class="unit-cell mono">${r.unit}</td>
+        <td class="num tabular">${r.bedrooms}</td>
+        <td class="num tabular">${r.lastBooked}d</td>
+        <td class="num tabular">${r.blocked60}</td>
+        <td class="num tabular">${r.minPrice60}</td>
+        <td class="num tabular">${r.pickup14}</td>
+        <td>${badgeHtml(r.flags)}</td>
+        <td>${sparkSvg(r.trend)}</td>
+      </tr>`).join("");
+    }
+    document.getElementById("mt-footnote").textContent = `Showing ${rows.length} of ${all.length} units · (Source: Wheelhouse 2026)`;
+    updateSortCarets(document.getElementById("mt-table"), state.sort);
+    renderFlagCounts(all);
+  }
+
+  document.getElementById("search-input").addEventListener("input", e => { state.search = e.target.value; render(); });
+  document.getElementById("flag-switch").addEventListener("click", e => {
+    const chip = e.target.closest(".flag-chip"); if (!chip) return;
+    const f = chip.dataset.flag;
+    if (state.flags.has(f)) state.flags.delete(f); else state.flags.add(f);
+    render();
+  });
+  document.getElementById("mt-table").querySelector("thead").addEventListener("click", e => {
+    const th = e.target.closest("th.sortable"); if (!th) return;
+    const key = th.dataset.key;
+    if (state.sort.key === key) state.sort.dir *= -1; else state.sort = { key, dir: key === "unit" ? 1 : -1 };
+    render();
+  });
+
+  document.getElementById("stat-units").textContent = DASHBOARD_DATA.metrics.units.length;
+  render();
+})();
+</script>
